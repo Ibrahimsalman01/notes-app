@@ -1,10 +1,27 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const fs = require('fs');
 const cors = require('cors');
 const app = express();
 
 app.use(express.json());
 app.use(express.static('build'));
 app.use(cors());
+
+let password;
+
+const url = 
+  `mongodb+srv://ibrahimsalman:${password}@cluster0.3vdgrst.mongodb.net/notes?retryWrites=true&w=majority`;
+
+mongoose.set('strictQuery', false);
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean
+});
+
+const Note = mongoose.model('Note', noteSchema);
 
 let notes = [
     {
@@ -25,11 +42,15 @@ let notes = [
 ];
 
 app.get('/', (request, response) => {
-    response.send('<h1>Hello World!</h1>');
+  response.send('<h1>Hello World!</h1>');
 })
 
 app.get('/api/notes', (request, response) => {
-    response.json(notes);
+  Note
+    .find({})
+    .then(notes => {
+      response.json(notes);
+    })
 })
 
 app.get('/api/notes/:id', (request, response) => {
@@ -79,5 +100,5 @@ app.delete('/api/notes/:id', (request, response) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
